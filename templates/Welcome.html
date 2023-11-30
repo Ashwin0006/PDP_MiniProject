@@ -1,16 +1,27 @@
 {% extends 'base.html' %}
 
 {% block head %}
-    <title>Signup</title>
+    <title>Student Mentor Sytem</title>
 {% endblock %}
 
 {% block body %}
-    <a>
-        Welcome to Student Mentor System!
-        Click SignUp If you Don't Have a Account!
-    </a>
+    <p>
+        <h1>Welcome To Student Mentor System!</h1>
+        <br>
+    </p>
     <form>
-        
+        <label>Username :</label>
+        <input type="text" id="username" name="username" placeholder="Enter Username" required>
+        <br>
+        <br>
+        <label>Password :</label>
+        <input type="password" id="password" name="passsword" placeholder="Enter Password" required>
+        <br>
+        <br>
+        <button type="submit">Login</button>
     </form>
-    <button type="submit">SignUp</button>
+    <br>
+    
+    Click <a href="{{ url_for('signup_page') }}">here</a> If you Don't Have a Account
+
 {% endblock %}
