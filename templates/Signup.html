@@ -5,9 +5,29 @@
 {% endblock %}
 
 {% block body %}
-    <form method="post" action="{{ url_for('studentlogin') }}">
+    <form method="post" action="{{ url_for('signup') }}">
+        <h1>Fill The Following Form to SignUp</h1>
         <label>Username :</label>
-        <input type="text" name="username">
+        <input type="text" name="username" required>
+        <br>
+        <br>
+        <label>Password :</label>
+        <input type="password" name="password" required>
+        <br>
+        <br>
+        <label>Role :</label>
+            <select name="role">
+                <option value="mentor">Mentor</option>
+                <option value="student">Student</option>
+            </select>
+        <br>
+        <br>
+        <label>Proof :</label>
+            <select name="proof">
+                <option value="yes">True</option>
+                <option value="no">False</option>
+            </select>
+        <br>
         <br>
         <button type="submit">Submit</button>
     </form>
