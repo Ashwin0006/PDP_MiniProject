@@ -94,7 +94,7 @@ def login():
                     if(mentor_obj.name == name):
                         student_id = [student.id for student in lst_student_obj]
                         student_name = [student.name for student in lst_student_obj]
-                        student_details = [student.details for student in lst_student_obj]
+                        student_details = [student.personal for student in lst_student_obj]
 
                 return render_template("main_mentor.html", ids=student_id, 
                                        names=student_name, details=student_details)
