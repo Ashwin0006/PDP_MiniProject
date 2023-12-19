@@ -38,7 +38,7 @@
         }
 
         .selected {
-            background-color: #a8d3ff;  /* Add a background color to highlight the selected row */
+            background-color: #a8d3ff;  
         }
 
         button {
@@ -67,13 +67,17 @@
     <table id="menteeTable">
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Mentee Name</th>
+                <th>Details</th>
             </tr>
         </thead>
         <tbody>
-            {% for mentee in mentees %}
+            {% for i in range(len(ids)) %}
                 <tr onclick="selectMentee(this)">
-                    <td>{{ mentee }}</td>
+                    <td>{{ ids[i] }}</td>
+                    <td>{{ names[i] }}</td>
+                    <td>{{ details[i] }}</td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -82,7 +86,9 @@
     <h2>Schedule a Meeting:</h2>
     <br>
     <button onclick="scheduleMeeting()">Schedule</button>
-
+    <br>
+    <br>
+    <button onclick="viewDetails()">View Details</button>
     <div id="clock"></div>
     
     <script>
@@ -124,10 +130,33 @@
                 }
             };
             xhr.send(JSON.stringify({ menteeName: selectedMentee }));
-        } else {
+        } 
+        else {
+            console.log('No mentee selected.');
+        }     
+    }
+
+    function viewDetails() {
+        var selectedRow = document.querySelector('#menteeTable tr.selected');
+        if (selectedRow) {
+            var selectedMentee = selectedRow.querySelector('td').innerText;
+
+            // Send an AJAX request to the Flask route with the selected mentee's name
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/view_details", true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.onload = function () {
+                if (xhr.status == 200) {
+                    console.log('Details Shown SucessFully!');
+                } else {
+                    console.error('Failed to show details.');
+                }
+            };
+            xhr.send(JSON.stringify({ menteeName: selectedMentee }));
+        } 
+        else {
             console.log('No mentee selected.');
         }
     }
-
     </script>
 {% endblock %}

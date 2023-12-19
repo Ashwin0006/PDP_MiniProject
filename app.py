@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request
-import json
 import pickle
+from student import *
+from mentor import *
+
 
 
 app = Flask(__name__)
@@ -8,51 +10,70 @@ notifications = []
 # with open('notifications.pickle', 'rb') as infile:
 #     notifications = pickle.load(infile)
 #     print(notifications)
+def get_details(name):
+    pass
 
-def load_from_json(path):
+def load_from_pickle(path):
     try:
-        with open(path, 'r') as outfile:
-            data = json.load(outfile)
+        with open(path, 'rb') as outfile:
+            data = pickle.load(outfile)
     except:
-        data = {"admin" : ("admin", "mentor")}
-        write_to_json(path, data)
+        data = Mentor('admin', 'admin', '#123', ['Hello', 'Works as Mentor'])
+        write_to_pickle(path, data)
     return data
 
-def write_to_json(path, data):
-    with open(path, 'w') as infile:
-        json.dump(data, infile)
+def write_to_pickle(data, path):
+    with open(path, 'rb') as infile:
+        lst_data = pickle.load(infile)
+    
+    lst_data.append(data)
+
+    with open(path, 'wb') as outfile:
+        pickle.dump(lst_data, outfile)
 
 def calculate_mentees():
-    data = load_from_json("data.json")
-    mentors = []
-    mentees = []
-    for key in data:
-        if(data[key][1] == 'mentor'):
-            mentors.append(key)
-        else:
-            mentees.append(key)
+    mentor_data = load_from_pickle("mentor_data.pickle")
+    mentee_data = load_from_pickle('student_data.pickle')
 
-    mentor_mentee_pair = []
-    for mentor in mentors:
-        label = [mentor]
-        mentor_mentee_pair.append(label)
+    # mentors = []
+    # mentees = []
+    # for mentor in mentor_data:
+    #     mentors.append(mentor)
+    # for mentee in mentee_data:
+    #     mentees.append(mentee)
     
+    pair_dict = {}
+    val = []
+    for mentor in mentor_data:
+        pair_dict[mentor] = val
+    
+    # Assign then mentor and students pair
     i = 0
     j = 0
-    while(j < len(mentees)):
-        mentor_mentee_pair[i].append(mentees[j])
+    while(j < len(mentee_data)):
+        pair_dict[mentor_data[i]].append(mentee_data[j])
         j += 1
         i += 1
-        i = i % len(mentors)
-    final_data = {}
-    for i in mentor_mentee_pair:
-        mentor = i[0]
-        mentees_list = i[1:]
-        final_data[mentor] = mentees_list
+        i = i % len(mentor_data)
+
+    final_data = pair_dict
     print(final_data)
     with open('mentor_mentee.pickle', 'wb') as outfile:
         pickle.dump(final_data, outfile)
-        
+
+def check_credentials(name, pwd, role):
+    if role == "mentor":
+        data = load_from_pickle('mentor_data.pickle')
+        for mentor in data:
+            if mentor.name == name and mentor._pwd == pwd:
+                return True
+    elif(role == "student"):
+        data = load_from_pickle('student_data.pickle')
+        for student in data:
+            if student.name == name and student._pwd == pwd:
+                return True
+    return False
+
 
 @app.route("/")
 def index():
@@ -63,17 +84,20 @@ def login():
     name = request.form["username"]
     pwd = request.form["password"]
     role = request.form["role"]
-    data = load_from_json("data.json")
     try:
-        if(data[name][0] == pwd and data[name][1] == role):
+        if(check_credentials(name, pwd, role)):
             if(role == "mentor"):
-                results = []
                 with open('mentor_mentee.pickle', 'rb') as infile:
                     data = pickle.load(infile)
-                for mentor in data:
-                    if(mentor == name):
-                        results = data[mentor]
-                return render_template("main_mentor.html", mentees=results)
+
+                for mentor_obj, lst_student_obj in data.items():
+                    if(mentor_obj.name == name):
+                        student_id = [student.id for student in lst_student_obj]
+                        student_name = [student.name for student in lst_student_obj]
+                        student_details = [student.details for student in lst_student_obj]
+
+                return render_template("main_mentor.html", ids=student_id, 
+                                       names=student_name, details=student_details)
             elif(role == "student"):
                 ############ ---------- Work ---------------
                     # Need to create a page called 'main_students.html'
@@ -83,7 +107,7 @@ def login():
                 pass
             return "Going to your main page ...."
         else:
-            return "Invalid Password or Role"
+            return "Invalid Credentials!"
     except KeyError:
         return "Unable to Find Name"
     except Exception as e:
@@ -98,9 +122,18 @@ def schedule_meeting():
     notification = f'Meeting scheduled for mentee: {mentee_name}'
     notifications.append([mentee_name, notification])
 
+    print(notifications)
     with open('notifications.pickle', 'wb') as outfile:
         pickle.dump(notification, outfile)
     return "Meeting Scheduled"
+
+@app.route("/view_details", methods=["POST", "GET"])
+def view_details():
+    data = request.get_json()
+    mentee_name = data.get("menteeName")
+
+    details = get_details(mentee_name)
+    return "Details Are Shown!"
 
 @app.route("/signup_page")
 def signup_page():
@@ -111,15 +144,17 @@ def signup():
     name = request.form["username"]
     pwd = request.form["password"]
     role = request.form["role"]
-    proof = request.form["proof"]
-    if(proof == "yes"):
-        data = load_from_json("data.json")
-        data[name] = (pwd, role)
-        write_to_json("data.json", data)
-        calculate_mentees()
-        return 'SignUp Successful!'
-    else:
-        return("Invalid Proof!")
+    details = request.form["details"]
+    id_info = request.form['id']
+
+    if(role == "mentor"):
+        mentor_obj = Mentor(name, pwd, id_info, details)
+        write_to_pickle(mentor_obj, 'mentor_data.pickle')
+    elif(role == "student"):
+        student_obj = Student(name, pwd, id_info, details)
+        write_to_pickle(student_obj, 'student_data.pickle')
+    return 'SignUp Successful!'
+
 if __name__ == "__main__":
     calculate_mentees()
     app.run(debug = True)
