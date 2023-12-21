@@ -4,7 +4,7 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f4f4f4;
+            background-color: #ecf0f1;
             margin: 0;
             display: flex;
             justify-content: center;
@@ -12,25 +12,55 @@
             height: 100vh;
         }
 
+        .fancy-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
         .fancy-text {
             font-size: 2em;
-            color: #3498db;
+            color: #fff;
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 2px;
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
             background: linear-gradient(to right, #3498db, #2980b9);
-            color: transparent;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border: 2px solid #2980b9;
+            display: inline-block;
+        }
+
+        .home-link a {
+            text-decoration: none;
+            color: #2980b9;
+            padding: 10px;
+            border: 2px solid #2980b9;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .home-link a:hover {
+            background-color: #2980b9;
+            color: #fff;
         }
     </style>
+
 {% endblock %}
 
 {% block body %}
-    <div class="fancy-text"> {{  message  }}</div>
-    <br>
-    <a href="{{ url_for('go_home') }}">Go to Home</a>
+    <div class="fancy-container">
+        <div class="fancy-text">
+            {{ message }}
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <div class="home-link">
+            <a href="{{ url_for('go_home') }}">Go to Home</a>
+        </div>
+    </div>
 {% endblock %}

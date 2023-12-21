@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import json
 import pickle
 from student import *
 from mentor import *
@@ -6,12 +7,25 @@ from mentor import *
 
 
 app = Flask(__name__)
-notifications = []
-# with open('notifications.pickle', 'rb') as infile:
-#     notifications = pickle.load(infile)
-#     print(notifications)
+
+
+def get_notifications():
+    data = read_from_json('notifications.json')
+    return data
+
 def get_details(name):
     pass
+
+def save_to_json(path, data):
+    with open(path, 'w') as file:
+        json.dump(data, file)
+
+def read_from_json(path):
+    with open(path, 'r') as file:
+       data = json.load(file)
+    
+    print(data)
+    return data
 
 def load_from_pickle(path):
     try:
@@ -44,9 +58,8 @@ def calculate_mentees():
     print("Mentors :", mentor_data)
     print("Menteee :", mentee_data)
     pair_dict = {}
-    val = []
     for mentor in mentor_data:
-        pair_dict[mentor] = val
+        pair_dict[mentor] = []
     
     # Assign then mentor and students pair
     i = 0
@@ -108,7 +121,7 @@ def login():
                         student_id = [student.id for student in lst_student_obj]
                         student_name = [student.name for student in lst_student_obj]
                         student_details = [student.personal for student in lst_student_obj]
-                    print("Details :", student_id, student_name, student_details)
+                        print("Details :", student_id, student_name, student_details)
 
                 return render_template("main_mentor.html", ids=student_id, 
                                        names=student_name, details=student_details)
@@ -127,21 +140,26 @@ def login():
     except Exception as e:
         return f"Error: {e}"
 
-'''
-@app.route("/schedule_meeting", methods=['POST'])
+@app.route("/schedule_meeting", methods=['POST', "GET"])
 def schedule_meeting():
-    global notifications
+
+    notifications = get_notifications()
+
     data = request.get_json()
     mentee_name = data.get('menteeName')
 
     notification = f'Meeting scheduled for mentee: {mentee_name}'
     notifications.append([mentee_name, notification])
 
-    print(notifications)
-    with open('notifications.pickle', 'wb') as outfile:
-        pickle.dump(notification, outfile)
-    return "Meeting Scheduled"
-'''
+    print("Notification :", notifications)
+    save_to_json('notifications.json', notifications)
+
+    return render_template("go_home_page.html", message="Meeting Scheduled Sucessfully!")
+
+@app.route("/end_page_schedule_meeting")
+def end_page_schedule_meeting():
+    return render_template("go_home_page.html", message="Meeting has been Scheduled!")
+
 @app.route("/view_details", methods=["POST", "GET"])
 def view_details():
     data = request.get_json()
@@ -170,13 +188,6 @@ def signup():
         write_to_pickle(student_obj, 'student_data.pickle')
     calculate_mentees()
     return render_template('go_home_page.html',message='SignUp SuccessFul')
-
-@app.route("/schedule_meeting")
-def schedule_meeting():
-    global notifications
-
-    
-    return "Meeting SCHEDULED"
 
 
 if __name__ == "__main__":

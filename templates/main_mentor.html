@@ -84,10 +84,13 @@
     </table>
 
     <h2>Schedule a Meeting:</h2>
-    <br>
-    <button onclick="go_to()">Schedule</button>
-    <br>
-    <br>
+    <form action="end_page_schedule_meeting" methods="post">
+        <br>
+        <button type="submit" onclick="go_to()">Schedule</button>
+        <br>
+        <br>
+    </form>
+    
     <button onclick="viewDetails()">View Details</button>
     <div id="clock"></div>
     
@@ -115,11 +118,11 @@
 
         function go_to(){
 
-            // var mentor_name = 
-            window.location.href = "{{ url_for('schedule_meeting') }}";
+            scheduleMeeting();
+
         }
         
-        /*
+        
         function scheduleMeeting() {
         var selectedRow = document.querySelector('#menteeTable tr.selected');
         if (selectedRow) {
@@ -141,7 +144,7 @@
         else {
             console.log('No mentee selected.');
         }  
-    }*/
+    }
 
     function viewDetails() {
         var selectedRow = document.querySelector('#menteeTable tr.selected');
