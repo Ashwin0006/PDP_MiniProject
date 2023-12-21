@@ -75,9 +75,9 @@
         <tbody>
             {% for id in ids %}
                 <tr onclick="selectMentee(this)">
-                    <td>{{ ids[i] }}</td>
-                    <td>{{ names[i] }}</td>
-                    <td>{{ details[i] }}</td>
+                    <td>{{ ids[loop.index-1] }}</td>
+                    <td>{{ names[loop.index-1] }}</td>
+                    <td>{{ details[loop.index-1] }}</td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -85,7 +85,7 @@
 
     <h2>Schedule a Meeting:</h2>
     <br>
-    <button onclick="scheduleMeeting()">Schedule</button>
+    <button onclick="go_to()">Schedule</button>
     <br>
     <br>
     <button onclick="viewDetails()">View Details</button>
@@ -113,6 +113,13 @@
             row.classList.add('selected');
         }
 
+        function go_to(){
+
+            // var mentor_name = 
+            window.location.href = "{{ url_for('schedule_meeting') }}";
+        }
+        
+        /*
         function scheduleMeeting() {
         var selectedRow = document.querySelector('#menteeTable tr.selected');
         if (selectedRow) {
@@ -133,8 +140,8 @@
         } 
         else {
             console.log('No mentee selected.');
-        }     
-    }
+        }  
+    }*/
 
     function viewDetails() {
         var selectedRow = document.querySelector('#menteeTable tr.selected');

@@ -8,3 +8,6 @@ class Student:
         self.personal = personal
         self.mentor_assigned = mentor_assigned
         self.role = 'student'
+    
+    def __str__(self):
+        return self.name

@@ -8,4 +8,7 @@ class Mentor:
         self.details = details
         self.role = "mentor"
     
+    def __str__(self):
+        return self.name
+    
     

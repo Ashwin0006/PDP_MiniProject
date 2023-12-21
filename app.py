@@ -41,7 +41,8 @@ def calculate_mentees():
     #     mentors.append(mentor)
     # for mentee in mentee_data:
     #     mentees.append(mentee)
-    
+    print("Mentors :", mentor_data)
+    print("Menteee :", mentee_data)
     pair_dict = {}
     val = []
     for mentor in mentor_data:
@@ -57,7 +58,7 @@ def calculate_mentees():
         i = i % len(mentor_data)
 
     final_data = pair_dict
-    print(final_data)
+    print("Final_Data :", final_data)
     with open('mentor_mentee.pickle', 'wb') as outfile:
         pickle.dump(final_data, outfile)
 
@@ -79,6 +80,10 @@ def check_credentials(name, pwd, role):
 def index():
     return render_template("Welcome.html")
 
+@app.route("/go_home")
+def go_home():
+    return render_template("Welcome.html")
+
 @app.route("/login", methods=['POST', 'GET'])
 def login():
     name = request.form["username"]
@@ -89,12 +94,21 @@ def login():
             if(role == "mentor"):
                 with open('mentor_mentee.pickle', 'rb') as infile:
                     data = pickle.load(infile)
-
+                    printable_data = {}
+                    for mentor in data:
+                        students_data = []
+                        for student_obj in data[mentor]:
+                            students_data.append(str(student_obj))
+                        printable_data[str(mentor)] = students_data
+                
+                print("Data :", printable_data) 
+            
                 for mentor_obj, lst_student_obj in data.items():
                     if(mentor_obj.name == name):
                         student_id = [student.id for student in lst_student_obj]
                         student_name = [student.name for student in lst_student_obj]
                         student_details = [student.personal for student in lst_student_obj]
+                    print("Details :", student_id, student_name, student_details)
 
                 return render_template("main_mentor.html", ids=student_id, 
                                        names=student_name, details=student_details)
@@ -113,6 +127,7 @@ def login():
     except Exception as e:
         return f"Error: {e}"
 
+'''
 @app.route("/schedule_meeting", methods=['POST'])
 def schedule_meeting():
     global notifications
@@ -126,7 +141,7 @@ def schedule_meeting():
     with open('notifications.pickle', 'wb') as outfile:
         pickle.dump(notification, outfile)
     return "Meeting Scheduled"
-
+'''
 @app.route("/view_details", methods=["POST", "GET"])
 def view_details():
     data = request.get_json()
@@ -153,7 +168,16 @@ def signup():
     elif(role == "student"):
         student_obj = Student(name, pwd, id_info, details)
         write_to_pickle(student_obj, 'student_data.pickle')
-    return 'SignUp Successful!'
+    calculate_mentees()
+    return render_template('go_home_page.html',message='SignUp SuccessFul')
+
+@app.route("/schedule_meeting")
+def schedule_meeting():
+    global notifications
+
+    
+    return "Meeting SCHEDULED"
+
 
 if __name__ == "__main__":
     calculate_mentees()
