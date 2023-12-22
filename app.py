@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, url_for
 import json
 import pickle
 from student import *
@@ -7,6 +7,7 @@ from flask import jsonify
 
 
 app = Flask(__name__)
+
 
 
 def get_notifications():
@@ -159,10 +160,13 @@ def schedule_meeting():
     mentee_name = data.get('menteeName')
 
     notification = f'Meeting scheduled for mentee: {mentee_name}'
-    notifications.append([mentee_name, notification])
+    value = False
+    notifications.append([mentee_name, notification, value])
 
-    print("Notification :", notifications)
     save_to_json('notifications.json', notifications)
+
+    #Calling Observer for Student!
+    Student.observer_notifications
 
     return render_template("go_home_page.html", message="Meeting Scheduled Sucessfully!")
 

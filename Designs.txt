@@ -1,0 +1,5 @@
+#Bruh I have No idea on What design I should Use :D
+
+#Maybe an observer pattern for the notifications of scedule meetings??
+    # Yea It workS!
+    # Implemented ?? Yesh!
