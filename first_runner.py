@@ -14,5 +14,9 @@ if __name__ == "__main__":
 
     with open('notifications.json', 'w') as file:
         json.dump([], file)
+    
+    with open('mentor_notifications.json', 'w') as file:
+        json.dump([], file)
 
-        
+    with open('students_data_form.json', 'w') as file:
+        json.dump([], file)
