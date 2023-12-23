@@ -1,5 +1,14 @@
+# Outline Completed!
+
+
 #Bruh I have No idea on What design I should Use :D
 
 #Maybe an observer pattern for the notifications of scedule meetings??
     # Yea It workS!
     # Implemented ?? Yesh!
+    # Added observer for both mentor and student object !
+
+#Stratergy Pattern Implemented for manager!
+    # Implemeted Successfully!
+    # For each report Generation!
+
