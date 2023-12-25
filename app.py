@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, url_for
+from facade_design import *
 import json
 import pickle
 from student import *
 from mentor import *
 from flask import jsonify
+from factory import Factory
 
 
 app = Flask(__name__)
@@ -11,8 +13,11 @@ app = Flask(__name__)
 
 
 def get_notifications():
-    data = read_from_json('notifications.json')
-    return data
+    try:
+        data = read_from_json('notifications.json')
+        return data
+    except:
+        print("Error")
 
 def get_details(name):
     mentee_data = load_from_pickle('student_data.pickle')
@@ -25,6 +30,7 @@ def get_details(name):
             mentor_assigned = mentee_obj.mentor_assigned
     
     return name, id, details, mentor_assigned
+
     
 
 def save_to_json(path, data):
@@ -35,58 +41,9 @@ def read_from_json(path):
     with open(path, 'r') as file:
        data = json.load(file)
     
-    print(data)
     return data
 
-def load_from_pickle(path):
-    try:
-        with open(path, 'rb') as outfile:
-            data = pickle.load(outfile)
-    except:
-        data = Mentor('admin', 'admin', '#123', ['Hello', 'Works as Mentor'])
-        write_to_pickle(path, data)
-    return data
-
-def write_to_pickle(data, path):
-    with open(path, 'rb') as infile:
-        lst_data = pickle.load(infile)
-    
-    lst_data.append(data)
-
-    with open(path, 'wb') as outfile:
-        pickle.dump(lst_data, outfile)
-
-def calculate_mentees():
-    mentor_data = load_from_pickle("mentor_data.pickle")
-    mentee_data = load_from_pickle('student_data.pickle')
-
-    # mentors = []
-    # mentees = []
-    # for mentor in mentor_data:
-    #     mentors.append(mentor)
-    # for mentee in mentee_data:
-    #     mentees.append(mentee)
-    print("Mentors :", mentor_data)
-    print("Menteee :", mentee_data)
-    pair_dict = {}
-    for mentor in mentor_data:
-        pair_dict[mentor] = []
-    
-    # Assign then mentor and students pair
-    i = 0
-    j = 0
-    while(j < len(mentee_data)):
-        pair_dict[mentor_data[i]].append(mentee_data[j])
-        mentee_data[j].mentor_assigned = mentor_data[i]
-        j += 1
-        i += 1
-        i = i % len(mentor_data)
-
-    final_data = pair_dict
-    print("Final_Data :", final_data)
-    with open('mentor_mentee.pickle', 'wb') as outfile:
-        pickle.dump(final_data, outfile)
-
+# Middle Ware Function 1 for chain of responsibility pattern!
 def check_credentials(name, pwd, role):
     if role == "mentor":
         data = load_from_pickle('mentor_data.pickle')
@@ -126,17 +83,18 @@ def login():
                             students_data.append(str(student_obj))
                         printable_data[str(mentor)] = students_data
                 
-                print("Data :", printable_data) 
+                #print("Data :", printable_data) 
             
                 for mentor_obj, lst_student_obj in data.items():
                     if(mentor_obj.name == name):
+                        mtr_obj = mentor_obj
                         student_id = [student.id for student in lst_student_obj]
                         student_name = [student.name for student in lst_student_obj]
                         student_details = [student.personal for student in lst_student_obj]
-                        print("Details :", student_id, student_name, student_details)
+                        #print("Details :", student_id, student_name, student_details)
 
                 return render_template("main_mentor.html", ids=student_id, 
-                                       names=student_name)
+                                       names=student_name, mentor_id=mtr_obj.id)
             elif(role == "student"):
                 flag = 0
                 with open('students_data_form.json', 'r') as file:
@@ -155,11 +113,11 @@ def login():
                 return render_template("student_main_page.html")
             return "Going to your main page ...."
         else:
-            return "Invalid Credentials!"
+            return render_template('error_template.html', error_message="Invalid Credentials")
     except KeyError:
-        return "Unable to Find Name"
+        return render_template('error_template.html', error_message="Unable to Find Name")
     except Exception as e:
-        return f"Error: {e}"
+        return render_template('error_template.html', error_message=e)
 
 @app.route("/schedule_meeting", methods=['POST', "GET"])
 def schedule_meeting():
@@ -193,6 +151,26 @@ def view_details():
 
     return jsonify(name=name, id=id, details=details, mentor_assigned=mentor_assigned)
 
+@app.route("/assign_mentee_details", methods=["POST", "GET"])
+def assign_mentee_details():
+    id_no = request.form["id_no"]
+    mentee_details = request.form["mentor_assigned"]
+
+    mentee_data = load_from_pickle('student_data.pickle')
+
+    for mentee_obj in mentee_data:
+        if(mentee_obj.id == id_no or mentee_obj.name == id_no):
+            mentee_obj.mentor_assigned = mentee_details 
+    
+    with open('student_data.pickle', 'wb') as file:
+        pickle.dump(mentee_data, file)
+
+    name, id, details, mentor_assigned = get_details(id_no)
+
+    return render_template('student_details_template.html', 
+                           name=name, id=id, details=details, mentor_assigned=mentor_assigned)
+
+
 @app.route('/details_page')
 def details_page():
 
@@ -202,13 +180,15 @@ def details_page():
     name, id, details, mentor_assigned = get_details(name)
 
     # Pass the details to the template
+    if(mentor_assigned is None):
+        mentor_assigned = "Default Not Assigned"
     
     return render_template(
         'student_details_template.html',
         name=name,
         id=id,
         details=details,
-        mentor_assigned="Test Runner"
+        mentor_assigned=mentor_assigned
     )
     
    # return jsonify(name, id, details, mentor_assigned)
@@ -227,10 +207,10 @@ def signup():
     id_info = request.form['id']
 
     if(role == "mentor"):
-        mentor_obj = Mentor(name, pwd, id_info, details)
+        mentor_obj = Factory('mentor', name, pwd, id_info, details)
         write_to_pickle(mentor_obj, 'mentor_data.pickle')
     elif(role == "student"):
-        student_obj = Student(name, pwd, id_info, details)
+        student_obj = Factory('student', name, pwd, id_info, details)
         write_to_pickle(student_obj, 'student_data.pickle')
     calculate_mentees()
     return render_template('go_home_page.html',message='SignUp SuccessFul')
@@ -262,7 +242,6 @@ def handle_forms_data():
 
     data.append(new_data)
 
-    print("New_data", new_data)
     with open('students_data_form.json', 'w') as file:
         json.dump(data, file)
 
@@ -307,5 +286,6 @@ def home_after_mentee_schedule():
     return render_template('go_home_page.html', message="Meeting Scheduled SuccessFully!")
 
 if __name__ == "__main__":
+    # Facade Patterns uaage!
     calculate_mentees()
     app.run(debug = True)
