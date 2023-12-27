@@ -18,6 +18,7 @@ class Student:
         with open('notifications.json', 'r') as file:
             data = json.load(file)
         for i in data:
+            # State Pattern and changing Pattern!
             if(i[2] == False):
                 print("Notification Received :", i[1])
                 i[2] = True

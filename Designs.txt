@@ -11,8 +11,6 @@ system.
 #The manager should be able to generate various reports from these mentee records.
 
 
-#Bruh I have No idea on What design I should Use :D
-
 #Maybe an observer pattern for the notifications of scedule meetings??
     # Yea It workS!
     # Implemented ?? Yesh!
@@ -23,10 +21,34 @@ system.
     # For each report Generation!
 
 #Facade Pattern
-    #Pattern for interface
+    # Pattern for interface
     # Added!
 
 #Chain of Responsibility Pattern
     #use of middle ware then deciding the output!
     #Added
+
+#Factory Pattern
+    #Added
+    #Used for creating mentor and student objects!
+
+#State Pattern!
+    #For messages!
+    #Use of a boolean value to change state for each notification.
+
+#Model-View-Control pattern(MVC)
+    #Added!
+    #Use of the buttons and other inputs to keep the display updated!
+    #(i.e) Use of a Model as view and a controller that controls the view.
+
+#Command Pattern 
+    #Used in buttons as they are the invoker.
+    #These will call the function for buttons function on JavaScript!
+    #The receiver is the student or mentor object they act upon!
+    #The command will be the function that works in backend connecting the object with the invoker.
+
+
+
+
+
 
